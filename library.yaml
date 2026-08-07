@@ -22,5 +22,8 @@ library:
       source: https://github.com/felipemm/fmm-ai-library/blob/main/skills/engineering/test-coverage/SKILL.md
   agents: []
   prompts: []
-  extensions: []
+  extensions:
+    - name: minimal
+      description: Model name + context meter in a compact footer for Pi
+      source: https://github.com/felipemm/the-library/blob/main/files/extensions/minimal.ts
   themes: []
