@@ -1,15 +1,26 @@
 default_dirs:
   skills:
-    - default: .claude/skills/
-    - global: ~/.claude/skills/
+    - default: .pi/agent/skills/
+    - global: ~/.pi/agent/skills/
   agents:
-    - default: .claude/agents/
-    - global: ~/.claude/agents/
+    - default: .pi/agent/agents/
+    - global: ~/.pi/agent/agents/
   prompts:
-    - default: .claude/commands/
-    - global: ~/.claude/commands/
+    - default: .pi/agent/prompts/
+    - global: ~/.pi/agent/prompts/
+  extensions:
+    - default: .pi/agent/extensions/
+    - global: ~/.pi/agent/extensions/
+  themes:
+    - default: .pi/agent/themes/
+    - global: ~/.pi/agent/themes/
 
 library:
-  skills: []
+  skills:
+    - name: test-coverage
+      description: Adds, validates, and improves automated tests for a codebase or a single change
+      source: https://github.com/felipemm/fmm-ai-library/blob/main/skills/engineering/test-coverage/SKILL.md
   agents: []
   prompts: []
+  extensions: []
+  themes: []

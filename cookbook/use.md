@@ -54,7 +54,7 @@ If the entry has a `requires` field:
   ```bash
   cp <prompt_file> <target_directory>/<prompt_name>.md
   ```
-- If the agent or prompt is nested in a subdirectory under the `agents/` or `commands/` directories, copy the subdirectory to the target as well, creating the subdir if it doesn't exist. This is useful because it keeps the agents or commands grouped together.
+- If the agent or prompt is nested in a subdirectory under the `agents/` or `prompts/` directories, copy the subdirectory to the target as well, creating the subdir if it doesn't exist. This is useful because it keeps the agents or prompts grouped together.
 
 **If source is a GitHub URL**:
 - Parse the URL to extract: `org`, `repo`, `branch`, `file_path`

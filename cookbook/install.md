@@ -7,7 +7,9 @@ First-time setup of The Library on a new device. The user either has the templat
 
 ### 1. Check Prerequisites
 - Verify `git` is installed: `git --version`
-- Verify the global skills directory exists or can be created: `~/.claude/skills/`
+- Verify `pi` is installed: `pi --version` or `which pi`
+- Verify the Pi agent config directory exists or can be created: `~/.pi/agent/`
+- Verify the global skills directory exists or can be created: `~/.pi/agent/skills/`
 
 ### 2. Determine Fork Status
 Ask the user: **"Is this the template repo or your own fork?"**
@@ -34,22 +36,36 @@ git clone <fork_url> .
 
 If already cloned (e.g., user cloned the template first), just update the remote per step 2.
 
-### 4. Update Variables
+### 4. Register with Pi
+Add the library skill directory to Pi's skills paths in `~/.pi/agent/settings.json`:
+
+```json
+{
+  "skills": [
+    "~/.pi/agent/skills/library"
+  ]
+}
+```
+
+If `skills` already has entries, append `"~/.pi/agent/skills/library"` to the array. Pi discovers skills from every path listed here.
+
+### 5. Update Variables
 - Open `SKILL.md` in the library directory
 - Take note of your current working directory.
 - Update the `## Variables` section:
   - **LIBRARY_REPO_URL**: Set to the user's fork URL
-  - **LIBRARY_YAML_PATH**: Confirm path (default: `~/.claude/skills/library/library.yaml`)
-  - **LIBRARY_SKILL_DIR**: Confirm path (default: `~/.claude/skills/library/`)
+  - **LIBRARY_YAML_PATH**: Confirm path (default: `~/.pi/agent/skills/library/library.yaml`)
+  - **LIBRARY_SKILL_DIR**: Confirm path (default: `~/.pi/agent/skills/library/`)
 
-### 5. Verify Installation
+### 6. Verify Installation
 - Confirm SKILL.md exists at `<LIBRARY_SKILL_DIR>/SKILL.md`
 - Confirm library.yaml exists at `<LIBRARY_SKILL_DIR>/library.yaml`
-- Confirm the `/library` command is now available
+- Confirm `~/.pi/agent/settings.json` includes the library skill path
+- Start a new Pi session and confirm the `/library` command is available
 
-### 6. Done
+### 7. Done
 Tell the user:
-- The Library is now globally available
+- The Library is now globally available in Pi
 - `/library list` will show the catalog (empty by default)
 - `/library add` to start adding skills, agents, and prompts
 - The `justfile` in the library directory has shorthand commands

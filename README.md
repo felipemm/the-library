@@ -20,7 +20,7 @@ Think of it as a `package.json` for agent capabilities — but instead of packag
 
 **This is a pure agent application.** There are no scripts, no CLIs, no dependencies, no build tools. The entire application is encoded in `SKILL.md` and a set of cookbook instructions that teach the agent exactly what to do. The agent IS the runtime. This matters because:
 
-- Any agent harness that reads skill files can run it (Claude Code, Pi, etc.)
+- Any agent harness that reads skill files can run it (Pi, Claude Code, etc.)
 - You can modify behavior by editing markdown, not code
 - The skill can be extended, forked, and adapted instantly
 - An orchestrator agent can chain library commands without any tooling overhead
@@ -40,8 +40,8 @@ As you build with AI agents, you accumulate skills, custom agents, and prompts �
 ![The Problem: Siloed Teams](images/32_problem_team_sharing.svg)
 
 Existing solutions don't fit:
-- **Global `~/.claude/*`** — exposes everything to every agent. Global is the opposite of specialized.
-- **Claude Code plugins** — requires marketplace infrastructure, manifests, and locks you into one platform.
+- **Global `~/.pi/agent/*`** — exposes everything to every agent. Global is the opposite of specialized.
+- **Platform-specific plugins** — requires marketplace infrastructure, manifests, and locks you into one platform.
 - **Single monorepo** — doesn't reflect reality. You build agentics in specific codebases for specific use cases.
 
 ## How It Works
@@ -53,14 +53,20 @@ Existing solutions don't fit:
 ```yaml
 default_dirs:
   skills:
-    - default: .claude/skills/
-    - global: ~/.claude/skills/
+    - default: .pi/agent/skills/
+    - global: ~/.pi/agent/skills/
   agents:
-    - default: .claude/agents/
-    - global: ~/.claude/agents/
+    - default: .pi/agent/agents/
+    - global: ~/.pi/agent/agents/
   prompts:
-    - default: .claude/commands/
-    - global: ~/.claude/commands/
+    - default: .pi/agent/prompts/
+    - global: ~/.pi/agent/prompts/
+  extensions:
+    - default: .pi/agent/extensions/
+    - global: ~/.pi/agent/extensions/
+  themes:
+    - default: .pi/agent/themes/
+    - global: ~/.pi/agent/themes/
 
 library:
   skills:
@@ -101,7 +107,7 @@ Dependencies are resolved and pulled first, recursively.
 
 ## Prerequisites
 
-- **Claude Code** (or a compatible agent harness that reads `.claude/skills/` — e.g., Pi)
+- **Pi** — the coding agent harness (`PI_CODING_AGENT_DIR` defaults to `~/.pi/agent`)
 - **git** — for cloning sources and syncing the catalog
 - **gh** (optional) — GitHub CLI for forking, cloning, and private repo access. Install: `brew install gh` or see [gh docs](https://cli.github.com)
 - **GitHub SSH key or `GITHUB_TOKEN`** — for accessing private repos (not needed if using `gh auth login`)
@@ -109,7 +115,7 @@ Dependencies are resolved and pulled first, recursively.
 
 ## Installation
 
-This is a template repo. You fork it, clone it into your global skills directory, and it becomes a `/library` slash command available in every Claude Code session.
+This is a template repo. You fork it, clone it into your Pi global skills directory, register it in `settings.json`, and it becomes a `/library` slash command available in every Pi session.
 
 ### 1. Fork This Repo
 
@@ -124,20 +130,34 @@ Or fork manually via the GitHub UI.
 
 ### 2. Clone to Global Skills Directory
 
-Clone your fork into `~/.claude/skills/library`. This path is what makes `/library` available as a global slash command in Claude Code.
+Clone your fork into `~/.pi/agent/skills/library`. This path is what makes `/library` available as a global skill in Pi.
 
 ```bash
 # Using git
-mkdir -p ~/.claude/skills/library
-git clone <your-fork-url> ~/.claude/skills/library
+mkdir -p ~/.pi/agent/skills/library
+git clone <your-fork-url> ~/.pi/agent/skills/library
 
 # Or using GitHub CLI
-gh repo clone <yourname>/the-library ~/.claude/skills/library
+gh repo clone <yourname>/the-library ~/.pi/agent/skills/library
 ```
 
-### 3. Configure
+### 3. Register with Pi
 
-Open `~/.claude/skills/library/SKILL.md` and update the `## Variables` section with your fork URL. The agent reads these variables at runtime to know where to sync the catalog.
+Add the library path to `~/.pi/agent/settings.json`:
+
+```json
+{
+  "skills": [
+    "~/.pi/agent/skills/library"
+  ]
+}
+```
+
+If `skills` already has entries, append the library path to the array.
+
+### 4. Configure
+
+Open `~/.pi/agent/skills/library/SKILL.md` and update the `## Variables` section with your fork URL. The agent reads these variables at runtime to know where to sync the catalog.
 
 ```markdown
 # Before (template defaults)
@@ -147,11 +167,11 @@ Open `~/.claude/skills/library/SKILL.md` and update the `## Variables` section w
 - **LIBRARY_REPO_URL**: `https://github.com/yourname/the-library.git`
 ```
 
-The other two variables (`LIBRARY_YAML_PATH` and `LIBRARY_SKILL_DIR`) are correct by default if you cloned to `~/.claude/skills/library/`.
+The other two variables (`LIBRARY_YAML_PATH` and `LIBRARY_SKILL_DIR`) are correct by default if you cloned to `~/.pi/agent/skills/library/`.
 
-### 4. Verify
+### 5. Verify
 
-Start a new Claude Code session anywhere. `/library list` should work and show an empty catalog.
+Start a new Pi session anywhere. `/library list` should work and show an empty catalog.
 
 ## Quick Start
 
@@ -177,7 +197,7 @@ On another device, repo, or agent:
 /library use deploy
 ```
 
-This pulls the skill from the source repo into `.claude/skills/deploy/`.
+This pulls the skill from the source repo into `.pi/agent/skills/deploy/`.
 
 Want it globally available on this machine?
 
@@ -218,7 +238,7 @@ Pull the latest version of all installed items:
 
 ### Justfile Shortcuts
 
-The included `justfile` lets you run library commands from your terminal without an interactive Claude session.
+The included `justfile` lets you run library commands from your terminal without an interactive Pi session.
 
 ```bash
 just list                  # List catalog
@@ -229,12 +249,12 @@ just sync                  # Re-pull all installed items
 just search "keyword"
 ```
 
-> **Note:** Justfile recipes use `--dangerously-skip-permissions` because the agent needs filesystem and git access to clone, copy, and push. Review the `justfile` if you want to modify this behavior.
+> **Note:** Justfile recipes use `pi -p` (non-interactive mode) with `--skill` to load the library skill. Pi runs tools without per-action approval by default. Review the `justfile` if you want to modify this behavior.
 
 ## Architecture
 
 ```
-~/.claude/skills/library/     # The Library skill (globally installed)
+~/.pi/agent/skills/library/   # The Library skill (globally installed)
     SKILL.md                  # Agent instructions — the brain
     library.yaml              # Your catalog of references
     cookbook/                  # Step-by-step guides for each command
@@ -255,7 +275,7 @@ just search "keyword"
 - **Private-first**: Built for your specialized, competitive-edge agentics. Not a public marketplace.
 - **Reference-based**: The catalog stores pointers, not copies. Skills live in their source repos.
 - **Pure agent**: No scripts, no build tools. The SKILL.md teaches the agent everything it needs to know.
-- **Agent-agnostic**: Default target is `.claude/skills/` but supports any directory for any agent harness.
+- **Agent-agnostic**: Default target is `.pi/agent/` but supports any directory for any agent harness.
 - **Catalog, not manifest**: Entries define what's available, not what's installed. Pull on demand.
 
 ## The Agentic Stack
